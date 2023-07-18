@@ -3,11 +3,12 @@ plugins {
     id 'maven-publish'
     id 'net.minecraftforge.gradle' version '5.1.+'
     id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
 
-version = '1.0'
-group = 'com.yourname.modid' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'modid'
+version = '0.0.1-1.19.2'
+group = 'com.legendyboi.forgeprotect' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = 'forgeprotect'
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -50,10 +51,10 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-            property 'forge.enabledGameTestNamespaces', 'examplemod'
+            property 'forge.enabledGameTestNamespaces', 'forgeprotect'
 
             mods {
-                examplemod {
+                forgeprotect {
                     source sourceSets.main
                 }
             }
@@ -66,10 +67,10 @@ minecraft {
 
             property 'forge.logging.console.level', 'debug'
 
-            property 'forge.enabledGameTestNamespaces', 'examplemod'
+            property 'forge.enabledGameTestNamespaces', 'forgeprotect'
 
             mods {
-                examplemod {
+                forgeprotect {
                     source sourceSets.main
                 }
             }
@@ -85,10 +86,10 @@ minecraft {
 
             property 'forge.logging.console.level', 'debug'
 
-            property 'forge.enabledGameTestNamespaces', 'examplemod'
+            property 'forge.enabledGameTestNamespaces', 'forgeprotect'
 
             mods {
-                examplemod {
+                forgeprotect {
                     source sourceSets.main
                 }
             }
@@ -101,11 +102,11 @@ minecraft {
 
             property 'forge.logging.console.level', 'debug'
 
-            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            // Specify the forgeprotect for data generation, where to output the resulting resource, and where to look for existing resources.
+            args '--mod', 'forgeprotect', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
             mods {
-                examplemod {
+                forgeprotect {
                     source sourceSets.main
                 }
             }
@@ -132,6 +133,9 @@ dependencies {
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.19.2-43.2.14'
 
+    // https://mvnrepository.com/artifact/org.xerial/sqlite-jdbc
+    implementation 'org.xerial:sqlite-jdbc:3.42.0.0'
+
     // Real mod deobf dependency examples - these get remapped to your current mappings
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency
     // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}") // Adds the full JEI mod as a runtime dependency
@@ -145,16 +149,40 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 }
 
+shadowJar {
+    // Only shadow fluent-hc
+    dependencies {
+        include(dependency('org.xerial:sqlite-jdbc:.*'))
+    }
+
+    // Relocate fluent-hc to prevent conflicts with other mods that include it
+//    relocate 'org.sqlite', 'dev.mrflyn.libs.org.sqlite'
+
+    classifier '' // Replace the default JAR
+    doLast {
+        copy {
+//        from 'build/libs/'+archiveBaseName+'-'+archiveVersion+'.jar'
+            from 'build/libs/forgeprotect-0.0.1-1.19.2.jar'
+            into "run/mods"
+        }
+    }
+
+}
+
+reobf {
+    shadowJar {} // Reobfuscate the shadowed JAR
+}
+
 // Example for how to get properties into the manifest for reading at runtime.
 jar {
     manifest {
         attributes([
-                "Specification-Title"     : "examplemod",
-                "Specification-Vendor"    : "examplemodsareus",
+                "Specification-Title"     : "forgeprotect",
+                "Specification-Vendor"    : "forgeprotectsareus",
                 "Specification-Version"   : "1", // We are version 1 of ourselves
                 "Implementation-Title"    : project.name,
                 "Implementation-Version"  : project.jar.archiveVersion,
-                "Implementation-Vendor"   : "examplemodsareus",
+                "Implementation-Vendor"   : "forgeprotectsareus",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
