@@ -53,22 +53,51 @@ public class SQLite implements IDatabase {
     @Override
     public void init() {
         try {
-            String sql = "CREATE TABLE IF NOT EXISTS block_data (" +
-                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    "blockQuantity INTEGER, " +
-                    "blockState TEXT, " +
-                    "blockName TEXT, " +
-                    "userName TEXT, " +
-                    "time TEXT);";
+//            String sql = "CREATE TABLE IF NOT EXISTS block_data (" +
+//                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+//                    "blockQuantity INTEGER, " +
+//                    "blockState TEXT, " +
+//                    "blockName TEXT, " +
+//                    "userName TEXT, " +
+//                    "time TEXT);";
+
+            createBlockBrokenDataTable();
+            createBlockPlacedDataTable();
+
             try (Statement statement = connection.createStatement()) {
-                statement.executeUpdate(sql);
                 LOGGER.info("SQLite Tables Loaded!");
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
+    private void createBlockBrokenDataTable() throws SQLException {
+        String sql = "CREATE TABLE IF NOT EXISTS blockBrokenData (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "blockQuantity INTEGER, " +
+                "blockState TEXT, " +
+                "blockName TEXT, " +
+                "userName TEXT, " +
+                "time TEXT);";
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate(sql);
+        }
+    }
+
+    private void createBlockPlacedDataTable() throws SQLException {
+        String sql = "CREATE TABLE IF NOT EXISTS blockPlacedData (" +
+                "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                "blockQuantity INTEGER, " +
+                "blockState TEXT, " +
+                "blockName TEXT, " +
+                "userName TEXT, " +
+                "time TEXT);";
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate(sql);
+        }
+    }
+
 
     public Connection getConnection() {
         return connection;
