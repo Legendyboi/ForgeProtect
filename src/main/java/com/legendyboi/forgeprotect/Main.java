@@ -1,17 +1,19 @@
 package com.legendyboi.forgeprotect;
 
+import com.legendyboi.forgeprotect.commands.LookUpCommand;
 import com.legendyboi.forgeprotect.databases.IDatabase;
 import com.legendyboi.forgeprotect.databases.SQLite;
 
-import com.mojang.logging.LogUtils;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.server.command.ConfigCommand;
 
+import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
 
 @Mod(Main.MOD_ID)
@@ -37,6 +39,14 @@ public class Main {
 
         MinecraftForge.EVENT_BUS.register(this);
 
+    }
+
+    @SubscribeEvent
+    public void onCommandRegister(RegisterCommandsEvent event){
+
+        new LookUpCommand(event.getDispatcher());
+
+        ConfigCommand.register(event.getDispatcher());
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

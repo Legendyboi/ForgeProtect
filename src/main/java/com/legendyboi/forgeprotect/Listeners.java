@@ -1,5 +1,7 @@
 package com.legendyboi.forgeprotect;
 
+import com.legendyboi.forgeprotect.data.BlockData;
+import com.legendyboi.forgeprotect.data.PlayerActionData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.level.block.Block;
@@ -8,12 +10,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -28,9 +26,10 @@ public class Listeners {
         ServerPlayer player = (ServerPlayer) event.getPlayer();
         assert player != null;
         UUID playerUuid = player.getUUID();
+        String playerUserName = String.valueOf(player.getName());
 
         // Retrieve or create PlayerActionData object for the player
-        PlayerActionData playerActionData = playerActionDataMap.computeIfAbsent(playerUuid, uuid -> new PlayerActionData(playerUuid));
+        PlayerActionData playerActionData = playerActionDataMap.computeIfAbsent(playerUuid, uuid -> new PlayerActionData(playerUuid, playerUserName));
 
         // Get the block details
         Block block = event.getState().getBlock();
@@ -48,7 +47,7 @@ public class Listeners {
             NbtUtils.writeBlockState(event.getState()).write(dos);
             byte[] blockState = bos.toByteArray();
             // Create a new BlockData object
-            BlockData blockData = new BlockData(blockID, blockState, x, y, z, worldName, time);
+            BlockData blockData = new BlockData(blockID, blockState, x, y, z, worldName, playerUserName, time);
 
             // Add the BlockData to the player's broken blocks list
             playerActionData.addBrokenBlock(blockData);
@@ -64,8 +63,9 @@ public class Listeners {
         ServerPlayer player = (ServerPlayer) event.getEntity();
         assert player != null;
         UUID playerUuid = player.getUUID();
+        String playerUserName = String.valueOf(player.getName());
 
-        PlayerActionData playerActionData = playerActionDataMap.computeIfAbsent(playerUuid, uuid -> new PlayerActionData(playerUuid));
+        PlayerActionData playerActionData = playerActionDataMap.computeIfAbsent(playerUuid, uuid -> new PlayerActionData(playerUuid, playerUserName));
 
         // Get the block details
         Block block = event.getState().getBlock();
@@ -83,16 +83,13 @@ public class Listeners {
             int z = pos.getZ();
             String worldName = player.getLevel().dimension().location().toString();
             long time = System.currentTimeMillis();
-            BlockData blockData = new BlockData(blockID, blockState, x, y, z, worldName, time);
+            BlockData blockData = new BlockData(blockID, blockState, x, y, z, worldName, playerUserName, time);
             // Add the BlockData to the player's broken blocks list
             playerActionData.addPlacedBlock(blockData);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        // Create a new BlockData object
-
 
     }
 
@@ -131,30 +128,30 @@ public class Listeners {
 //        }
 //    }
 //
-
-    private static void logBlockBroken(String playerName, String blockName, String coords, String timeFormat) {
-        try {
-            // Get the SQLite database connection
-            // ForgeProtect.mod.db.getConnection();
-            Connection connection = Main.mod.db.getConnection();
-            if (connection == null) {
-                return;
-            }
-
-            // Prepare the SQL statement
-            String sql = "INSERT INTO block_data (blockName, userName, time) VALUES (?, ?, ?);";
-            try (PreparedStatement statement = connection.prepareStatement(sql)) {
-                // Set the parameter values
-                statement.setString(1, blockName);
-                statement.setString(2, playerName);
-                statement.setString(3, timeFormat);
-
-                // Execute the SQL statement
-                statement.executeUpdate();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-    }
+//
+//    private static void logBlockBroken(String playerName, String blockName, String coords, String timeFormat) {
+//        try {
+//            // Get the SQLite database connection
+//            // ForgeProtect.mod.db.getConnection();
+//            Connection connection = Main.mod.db.getConnection();
+//            if (connection == null) {
+//                return;
+//            }
+//
+//            // Prepare the SQL statement
+//            String sql = "INSERT INTO block_data (blockName, userName, time) VALUES (?, ?, ?);";
+//            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+//                // Set the parameter values
+//                statement.setString(1, blockName);
+//                statement.setString(2, playerName);
+//                statement.setString(3, timeFormat);
+//
+//                // Execute the SQL statement
+//                statement.executeUpdate();
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//
+//    }
 }

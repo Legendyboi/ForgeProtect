@@ -19,22 +19,18 @@ public class SQLite implements IDatabase {
     public boolean connect() {
         File folder = new File("config/ForgeProtect");
         LOGGER.info("Initializing SQLite!");
+
         if (!folder.exists()) {
-            if (!folder.mkdirs()) {
-                LOGGER.error("Could not create ForgeProtect directory!");
-            }
+            if (!folder.mkdirs()) { LOGGER.error("Could not create ForgeProtect directory!"); }
         }
+
         File dataFolder = new File(folder.getPath() + "/data.db");
+
         if (!dataFolder.exists()) {
-            try {
-                if (!dataFolder.createNewFile()) {
-                    LOGGER.error("Could not create data.db file!");
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                return false;
-            }
+            try { if (!dataFolder.createNewFile()) { LOGGER.error("Could not create data.db file!"); }
+            } catch (IOException e) { e.printStackTrace(); return false; }
         }
+
         this.url = "jdbc:sqlite:" + dataFolder;
         try {
             Class.forName("org.sqlite.JDBC");
@@ -53,13 +49,6 @@ public class SQLite implements IDatabase {
     @Override
     public void init() {
         try {
-//            String sql = "CREATE TABLE IF NOT EXISTS block_data (" +
-//                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-//                    "blockQuantity INTEGER, " +
-//                    "blockState TEXT, " +
-//                    "blockName TEXT, " +
-//                    "userName TEXT, " +
-//                    "time TEXT);";
 
             createBlockBrokenDataTable();
             createBlockPlacedDataTable();
@@ -75,11 +64,14 @@ public class SQLite implements IDatabase {
     private void createBlockBrokenDataTable() throws SQLException {
         String sql = "CREATE TABLE IF NOT EXISTS blockBrokenData (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "blockQuantity INTEGER, " +
-                "blockState TEXT, " +
-                "blockName TEXT, " +
-                "userName TEXT, " +
-                "time TEXT);";
+                "userName TEXT," +
+                "blockID TEXT, " +
+                "blockState BLOB, " +
+                "X INTEGER, " +
+                "Y INTEGER, " +
+                "Z INTEGER, " +
+                "worldName TEXT, " +
+                "time INTEGER);";
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate(sql);
         }
@@ -88,81 +80,23 @@ public class SQLite implements IDatabase {
     private void createBlockPlacedDataTable() throws SQLException {
         String sql = "CREATE TABLE IF NOT EXISTS blockPlacedData (" +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "blockQuantity INTEGER, " +
-                "blockState TEXT, " +
-                "blockName TEXT, " +
-                "userName TEXT, " +
-                "time TEXT);";
+                "userName TEXT," +
+                "blockID TEXT, " +
+                "blockState BLOB, " +
+                "X INTEGER, " +
+                "Y INTEGER, " +
+                "Z INTEGER, " +
+                "userName TEXT," +
+                "worldName TEXT, " +
+                "time INTEGER);";
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate(sql);
         }
     }
 
-
     public Connection getConnection() {
         return connection;
     }
 
-//    @Override
-//    public boolean isPresent(UUID uuid) {
-//        String sql = "SELECT uuid FROM login_data WHERE uuid=?;";
-//        try {
-//            try (PreparedStatement statement = connection.prepareStatement(sql)) {
-//                statement.setString(1, uuid.toString());
-//                ResultSet result = statement.executeQuery();
-//                return result.next();
-//            }
-//
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//            return false;
-//        }
-//    }
-//
-//    @Override
-//    public boolean isPresent(String name) {
-//        String sql = "SELECT username FROM login_data WHERE username=?;";
-//        try {
-//            try (PreparedStatement statement = connection.prepareStatement(sql)) {
-//                statement.setString(1, name);
-//                ResultSet result = statement.executeQuery();
-//                return result.next();
-//            }
-//
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//            return false;
-//        }
-//    }
-//
-//    @Override
-//    public boolean deleteData(UUID uuid) {
-//        String sql = "DELETE FROM login_data WHERE uuid=?;";
-//        try {
-//            try (PreparedStatement statement = connection.prepareStatement(sql)) {
-//                statement.setString(1, uuid.toString());
-//                statement.executeUpdate();
-//            }
-//            return true;
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//            return false;
-//        }
-//    }
-//
-//    @Override
-//    public boolean deleteData(String name) {
-//        String sql = "DELETE FROM login_data WHERE username=?;";
-//        try {
-//            try (PreparedStatement statement = connection.prepareStatement(sql)) {
-//                statement.setString(1, name);
-//                statement.executeUpdate();
-//            }
-//            return true;
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//            return false;
-//        }
-//    }
 }
 
